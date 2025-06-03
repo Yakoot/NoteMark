@@ -2,4 +2,12 @@
 <resources>
 
     <style name="Theme.NoteMark" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <!-- Set the splash screen background. -->
+        <item name="windowSplashScreenBackground">@color/primary</item>
+        <!-- Set the duration of the splash screen. -->
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+        <!-- Post-splash screen theme. -->
+        <item name="postSplashScreenTheme">@style/Theme.NoteMark</item>
+    </style>
 </resources>
