@@ -8,6 +8,7 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -92,7 +93,9 @@ fun AppTextField(
         interactionSource = interactionSource,
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         decorationBox = { innerTextField ->
-            Column {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 if (label != null) {
                     Text(
                         text = label,
@@ -104,6 +107,7 @@ fun AppTextField(
                 Box(
                     contentAlignment = Alignment.CenterStart,
                     modifier = Modifier
+                        .fillMaxWidth()
                         .border(
                             width = 1.dp,
                             color = borderColor,
