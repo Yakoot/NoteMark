@@ -88,7 +88,7 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(40.dp))
                 AppTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    text = "",
+                    value = "",
                     onValueChange = {},
                     label = "Email",
                     placeholder = "john.doe@example.com"
@@ -96,7 +96,7 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 AppTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    text = "",
+                    value = "",
                     onValueChange = {},
                     label = "Password",
                     placeholder = "Password"
