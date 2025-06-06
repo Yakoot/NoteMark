@@ -1,5 +1,8 @@
 package dev.mamkin.notemark.core.presentation.designsystem.text_fields
 
+import android.R.attr.label
+import android.R.attr.maxLines
+import android.R.attr.singleLine
 import android.R.attr.text
 import android.R.attr.textStyle
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -11,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.InputTransformation.Companion.keyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Icon
@@ -20,6 +24,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +43,7 @@ fun AppTextField(
     modifier: Modifier = Modifier,
     label: String? = null,
     supportingText: String? = null,
+    focusSupportingText: String? = null,
     placeholder: String? = null,
     maxLines: Int = Int.MAX_VALUE,
     singleLine: Boolean = false,
@@ -47,6 +53,15 @@ fun AppTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val isErrorStateVisible = remember(error, isFocused) {
+        error && !isFocused
+    }
+    val displayedSupportingText = remember(isFocused, supportingText, focusSupportingText) {
+        if (isFocused) focusSupportingText
+        else supportingText
+    }
     Column(
         modifier = modifier.fillMaxWidth()
     ) {
@@ -68,6 +83,7 @@ fun AppTextField(
             maxLines = maxLines,
             singleLine = singleLine,
             visualTransformation = visualTransformation,
+            interactionSource = interactionSource,
             placeholder = {
                 if (placeholder != null) {
                     Text(
@@ -79,15 +95,15 @@ fun AppTextField(
             },
             trailingIcon = trailingIcon,
             supportingText = {
-                if (supportingText != null) {
+                if (displayedSupportingText != null) {
                     Text(
-                        text = supportingText,
+                        text = displayedSupportingText,
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
 
             },
-            isError = error,
+            isError = isErrorStateVisible,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.surface,
@@ -117,7 +133,7 @@ private fun AppTextFieldPreview() {
             value = value,
             onValueChange = { value = it },
             placeholder = "Placeholder",
-            supportingText = "Supporting text",
+            focusSupportingText = "Use between 3 and 20 characters for your username.",
             label = "Label",
             error = false
         )

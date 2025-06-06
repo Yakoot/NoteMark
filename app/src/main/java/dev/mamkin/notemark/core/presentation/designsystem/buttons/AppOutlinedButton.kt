@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import dev.mamkin.notemark.core.presentation.designsystem.theme.NoteMarkTheme
 
 @Composable
-fun TextButton(
+fun AppOutlinedButton(
     modifier: Modifier = Modifier,
     text: String,
     onClick: () -> Unit,
@@ -44,7 +44,7 @@ fun TextButton(
 @Composable
 private fun TextButtonPreview() {
     NoteMarkTheme {
-        TextButton(
+        AppOutlinedButton(
             text = "Label",
             onClick = {}
         )

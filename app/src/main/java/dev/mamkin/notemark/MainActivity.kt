@@ -57,19 +57,31 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     LandingRoot(
                         navigateToRegister = {
                             backStack.add(Register)
+                            backStack.remove(Landing)
                         },
                         navigateToLogin = {
                             backStack.add(Login)
+                            backStack.remove(Landing)
                         }
                     )
                 }
 
                 is Login -> NavEntry(key) {
-                    LoginRoot()
+                    LoginRoot(
+                        navigateToRegister = {
+                            backStack.remove(Register)
+                            backStack.add(Register)
+                        }
+                    )
                 }
 
                 is Register -> NavEntry(key) {
-                    RegisterRoot()
+                    RegisterRoot(
+                        navigateToLogin = {
+                            backStack.remove(Login)
+                            backStack.add(Login)
+                        }
+                    )
                 }
 
                 else -> throw IllegalArgumentException("Unknown key: $key")

@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 
 class RegisterViewModel : ViewModel() {
 
@@ -27,8 +28,40 @@ class RegisterViewModel : ViewModel() {
 
     fun onAction(action: RegisterAction) {
         when (action) {
-            else -> TODO("Handle actions")
+            RegisterAction.AlreadyHaveAccountClicked -> {}
+            RegisterAction.CreateAccountClicked -> {}
+            is RegisterAction.EmailChanged -> onEmailChanged(action.value)
+            is RegisterAction.PasswordChanged -> onPasswordChanged(action.value)
+            is RegisterAction.RepeatPasswordChanged -> onRepeatPasswordChanged(action.value)
+            is RegisterAction.UsernameChanged -> onUsernameChanged(action.value)
         }
     }
+
+    private fun onUsernameChanged(value: String) {
+        _state.update {
+            it.copy(usernameValue = value)
+        }
+    }
+
+    private fun onEmailChanged(value: String) {
+        _state.update {
+            it.copy(emailValue = value)
+        }
+    }
+
+    private fun onPasswordChanged(value: String) {
+        _state.update {
+            it.copy(passwordValue = value)
+        }
+    }
+
+    private fun onRepeatPasswordChanged(value: String) {
+        _state.update {
+            it.copy(repeatPasswordValue = value)
+        }
+    }
+
+
+
 
 }

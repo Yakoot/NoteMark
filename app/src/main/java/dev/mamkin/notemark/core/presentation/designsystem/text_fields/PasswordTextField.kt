@@ -2,6 +2,7 @@ package dev.mamkin.notemark.core.presentation.designsystem.text_fields
 
 import android.R.attr.maxLines
 import android.R.attr.singleLine
+import android.R.attr.text
 import android.R.attr.textStyle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -43,7 +44,8 @@ import dev.mamkin.notemark.core.presentation.designsystem.theme.NoteMarkTheme
 
 @Composable
 fun PasswordTextField(
-    text: String,
+    modifier: Modifier = Modifier,
+    value: String,
     onValueChange: (String) -> Unit,
     label: String? = null,
     supportingText: String? = null,
@@ -52,7 +54,8 @@ fun PasswordTextField(
     var isPasswordVisible by remember { mutableStateOf(false) }
 
     AppTextField(
-        value = text,
+        modifier = modifier,
+        value = value,
         onValueChange = onValueChange,
         label = label,
         supportingText = supportingText,
@@ -92,7 +95,7 @@ private fun PasswordTextFieldPreview() {
     var text by remember { mutableStateOf("") }
     NoteMarkTheme {
         PasswordTextField(
-            text = text,
+            value = text,
             onValueChange = { text = it},
             placeholder = "Placeholder",
             supportingText = "Supporting text",
