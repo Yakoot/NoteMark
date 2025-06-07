@@ -38,7 +38,7 @@ import dev.mamkin.notemark.core.presentation.designsystem.buttons.AppFilledButto
 import dev.mamkin.notemark.core.presentation.designsystem.buttons.AppOutlinedButton
 import dev.mamkin.notemark.core.presentation.designsystem.theme.LandingBackground
 import dev.mamkin.notemark.core.presentation.designsystem.theme.NoteMarkTheme
-import dev.mamkin.notemark.core.presentation.utils.DeviceType
+import dev.mamkin.notemark.core.presentation.util.DeviceType
 
 @Composable
 fun LandingRoot(

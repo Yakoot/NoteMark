@@ -50,7 +50,9 @@ fun PasswordTextField(
     label: String? = null,
     supportingText: String? = null,
     placeholder: String? = null,
-) {
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    ) {
     var isPasswordVisible by remember { mutableStateOf(false) }
 
     AppTextField(
@@ -60,6 +62,8 @@ fun PasswordTextField(
         label = label,
         supportingText = supportingText,
         placeholder = placeholder,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
         visualTransformation = if (isPasswordVisible) {
             VisualTransformation.None
         } else {

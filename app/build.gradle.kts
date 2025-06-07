@@ -20,12 +20,19 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "BASE_URL", "\"https://notemark.pl-coding.com/\"")
+            buildConfigField("String", "API_KEY", "\"anton@mamkin.dev\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            buildConfigField("String", "BASE_URL", "\"https://rest.coincap.io/v3/\"")
+            buildConfigField("String", "API_KEY", "\"87f9b4d800466883081142eb81fad3c706e17dc9419cce84bd011a94852805aa\"")
         }
     }
     compileOptions {
@@ -37,6 +44,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -57,6 +65,8 @@ dependencies {
 //    implementation(libs.androidx.material3.adaptive.navigation3)
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.androidx.splashscreen)
+    implementation(libs.bundles.ktor)
+
 
 
     testImplementation(libs.junit)

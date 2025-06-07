@@ -1,6 +1,5 @@
 package dev.mamkin.notemark.login.presentation.login
 
-import android.R.attr.end
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,9 +8,15 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -19,10 +24,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,9 +40,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.mamkin.notemark.core.presentation.designsystem.buttons.AppFilledButton
 import dev.mamkin.notemark.core.presentation.designsystem.buttons.AppTextButton
 import dev.mamkin.notemark.core.presentation.designsystem.text_fields.AppTextField
+import dev.mamkin.notemark.core.presentation.designsystem.text_fields.PasswordTextField
 import dev.mamkin.notemark.core.presentation.designsystem.theme.NoteMarkTheme
-import dev.mamkin.notemark.core.presentation.utils.DeviceType
-import dev.mamkin.notemark.register.presentation.register.RegisterAction
+import dev.mamkin.notemark.core.presentation.util.DeviceType
 
 @Composable
 fun LoginRoot(
@@ -63,8 +73,8 @@ fun LoginScreen(
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val deviceType = DeviceType.fromWindowSizeClass(windowSizeClass)
-
-    val isTwoColumns = deviceType == DeviceType.TABLET_LANDSCAPE || deviceType == DeviceType.MOBILE_LANDSCAPE
+    val hasTopPadding = deviceType == DeviceType.MOBILE_PORTRAIT
+    val isTwoColumns = !deviceType.isPortrait()
     Scaffold(
         containerColor = MaterialTheme.colorScheme.primary,
         modifier = Modifier
@@ -75,7 +85,7 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(top = 8.dp),
+                .padding(top = if (hasTopPadding) 8.dp else 0.dp),
             color = MaterialTheme.colorScheme.surfaceContainerLowest,
             shape = RoundedCornerShape(topEnd = 20.dp, topStart = 20.dp)
         ) {
@@ -95,26 +105,31 @@ fun LoginScreen(
                         modifier = Modifier.weight(1f)
                     )
                     LoginForm(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f)
+                            .verticalScroll(rememberScrollState()),
                         state = state,
                         onAction = onAction
                     )
                 }
             } else {
+                val isCentered = deviceType.isTablet()
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
                             vertical = 32.dp,
                             horizontal = 16.dp,
-                        )
+                        ),
+                    horizontalAlignment = if (isCentered) Alignment.CenterHorizontally else Alignment.Start
                 ) {
                     LoginTitle(
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(40.dp))
                     LoginForm(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .widthIn(max = 560.dp)
+                            .verticalScroll(rememberScrollState()),
                         state = state,
                         onAction = onAction
                     )
@@ -154,29 +169,52 @@ fun LoginForm(
     state: LoginState,
     onAction: (LoginAction) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
+    val (emailFocus, passwordFocus) = remember { FocusRequester.createRefs() }
+
     Column(
         modifier = modifier
     ) {
         AppTextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(emailFocus),
             value = state.emailValue,
             supportingText = state.emailError,
             onValueChange = {
                 onAction(LoginAction.EmailChanged(it))
             },
             label = "Email",
-            placeholder = "john.doe@example.com"
+            placeholder = "john.doe@example.com",
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(FocusDirection.Down) }
+            )
         )
         Spacer(modifier = Modifier.height(16.dp))
-        AppTextField(
-            modifier = Modifier.fillMaxWidth(),
+        PasswordTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(passwordFocus),
             value = state.passwordValue,
             supportingText = state.passwordError,
             onValueChange = {
                 onAction(LoginAction.PasswordChanged(it))
             },
             label = "Password",
-            placeholder = "Password"
+            placeholder = "Password",
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.clearFocus()
+                    onAction(LoginAction.LoginClicked)
+                }
+            )
         )
         Spacer(modifier = Modifier.height(24.dp))
         AppFilledButton(
