@@ -43,10 +43,11 @@ import dev.mamkin.notemark.core.presentation.designsystem.text_fields.AppTextFie
 import dev.mamkin.notemark.core.presentation.designsystem.text_fields.PasswordTextField
 import dev.mamkin.notemark.core.presentation.designsystem.theme.NoteMarkTheme
 import dev.mamkin.notemark.core.presentation.util.DeviceType
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun LoginRoot(
-    viewModel: LoginViewModel = viewModel(),
+    viewModel: LoginViewModel = koinViewModel(),
     navigateToRegister: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()

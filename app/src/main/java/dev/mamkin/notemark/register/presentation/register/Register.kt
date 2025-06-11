@@ -43,10 +43,11 @@ import dev.mamkin.notemark.core.presentation.designsystem.text_fields.AppTextFie
 import dev.mamkin.notemark.core.presentation.designsystem.text_fields.PasswordTextField
 import dev.mamkin.notemark.core.presentation.designsystem.theme.NoteMarkTheme
 import dev.mamkin.notemark.core.presentation.util.DeviceType
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun RegisterRoot(
-    viewModel: RegisterViewModel = viewModel(),
+    viewModel: RegisterViewModel = koinViewModel(),
     navigateToLogin: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -184,6 +185,8 @@ fun RegisterForm(
             },
             maxLines = 1,
             supportingText = state.usernameError,
+            error = !state.usernameError.isNullOrEmpty(),
+            focusSupportingText = "Use between 3 and 20 characters for your username.",
             label = "Username",
             placeholder = "John.doe",
             keyboardOptions = KeyboardOptions(
@@ -201,6 +204,7 @@ fun RegisterForm(
                 .focusRequester(emailFocus),
             value = state.emailValue,
             supportingText = state.emailError,
+            error = !state.emailError.isNullOrEmpty(),
             onValueChange = {
                 onAction(RegisterAction.EmailChanged(it))
             },
@@ -221,6 +225,8 @@ fun RegisterForm(
                 .focusRequester(passwordFocus),
             value = state.passwordValue,
             supportingText = state.passwordError,
+            error = !state.passwordError.isNullOrEmpty(),
+            focusSupportingText = "Use 8 characters with a number or symbol for better security.",
             onValueChange = {
                 onAction(RegisterAction.PasswordChanged(it))
             },
@@ -239,7 +245,9 @@ fun RegisterForm(
                 .fillMaxWidth()
                 .focusRequester(repeatPasswordFocus),
             value = state.repeatPasswordValue,
+            error = !state.repeatPasswordError.isNullOrEmpty(),
             supportingText = state.repeatPasswordError,
+            focusSupportingText = "Use between 3 and 20 characters for your username.",
             onValueChange = {
                 onAction(RegisterAction.RepeatPasswordChanged(it))
             },
@@ -259,6 +267,7 @@ fun RegisterForm(
         AppFilledButton(
             modifier = Modifier.fillMaxWidth(),
             text = "Create account",
+            loading = state.buttonLoading,
             onClick = {
                 onAction(RegisterAction.CreateAccountClicked)
             },

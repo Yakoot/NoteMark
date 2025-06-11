@@ -27,8 +27,12 @@ class LoginViewModel : ViewModel() {
 
     fun onAction(action: LoginAction) {
         when (action) {
-            else -> TODO("Handle actions")
+            is LoginAction.EmailChanged -> onEmailChanged(action.value)
+            LoginAction.LoginClicked -> onLoginClicked()
+            is LoginAction.PasswordChanged -> TODO()
         }
     }
+
+    private fun onEmailChanged(value: String) {}
 
 }

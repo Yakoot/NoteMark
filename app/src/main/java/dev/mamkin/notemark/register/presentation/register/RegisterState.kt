@@ -9,5 +9,6 @@ data class RegisterState(
     val emailError: String? = null,
     val passwordError: String? = null,
     val repeatPasswordError: String? = null,
-    val buttonEnabled: Boolean = false,
+    val buttonEnabled: Boolean = true,
+    val buttonLoading: Boolean = false
 )

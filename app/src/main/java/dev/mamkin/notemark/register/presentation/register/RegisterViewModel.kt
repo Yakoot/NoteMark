@@ -2,66 +2,98 @@ package dev.mamkin.notemark.register.presentation.register
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.mamkin.notemark.main.domain.AuthDataSource
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class RegisterViewModel : ViewModel() {
+class RegisterViewModel(
+    private val authDataSource: AuthDataSource
+) : ViewModel() {
+    private val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\$".toRegex() // Compile regex once
 
-    private var hasLoadedInitialData = false
+    private val _usernameValue = MutableStateFlow("")
+    private val _emailValue = MutableStateFlow("")
+    private val _passwordValue = MutableStateFlow("")
+    private val _repeatPasswordValue = MutableStateFlow("")
+    private val _isLoading = MutableStateFlow(false)
 
-    private val _state = MutableStateFlow(RegisterState())
-    val state = _state
-        .onStart {
-            if (!hasLoadedInitialData) {
-                /** Load initial data here **/
-                hasLoadedInitialData = true
-            }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = RegisterState()
+    val state = combine(
+        _usernameValue,
+        _emailValue,
+        _passwordValue,
+        _repeatPasswordValue,
+        _isLoading
+    ) { username, email, password, repeatPassword, isLoading ->
+        val usernameError = if (username.isEmpty() || isValidUsername(username)) null else "Username must be at least 3 characters."
+        val emailError = if (email.isEmpty() || isValidEmail(email)) null else "Invalid email provided"
+        val passwordError = if (password.isEmpty() || isValidPassword(password)) null else "Password must be at least 8 characters and include a number or symbol."
+        val repeatPasswordError = if (repeatPassword.isEmpty() || password == repeatPassword) null else "Passwords do not match"
+
+        val isFormValid = usernameError == null && emailError == null && passwordError == null && repeatPasswordError == null
+                && username.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && repeatPassword.isNotEmpty()
+
+
+        RegisterState(
+            usernameValue = username,
+            usernameError = usernameError,
+            emailValue = email,
+            emailError = emailError,
+            passwordValue = password,
+            passwordError = passwordError,
+            repeatPasswordValue = repeatPassword,
+            repeatPasswordError = repeatPasswordError,
+            buttonEnabled = isFormValid,
+            buttonLoading = isLoading
         )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000L),
+        initialValue = RegisterState()
+    )
 
     fun onAction(action: RegisterAction) {
         when (action) {
-            RegisterAction.AlreadyHaveAccountClicked -> {}
-            RegisterAction.CreateAccountClicked -> {}
-            is RegisterAction.EmailChanged -> onEmailChanged(action.value)
-            is RegisterAction.PasswordChanged -> onPasswordChanged(action.value)
-            is RegisterAction.RepeatPasswordChanged -> onRepeatPasswordChanged(action.value)
-            is RegisterAction.UsernameChanged -> onUsernameChanged(action.value)
+            RegisterAction.AlreadyHaveAccountClicked -> { /* Handle navigation */ }
+            RegisterAction.CreateAccountClicked -> onCreateAccountClicked()
+            is RegisterAction.EmailChanged -> _emailValue.value = action.value
+            is RegisterAction.PasswordChanged -> _passwordValue.value = action.value
+            is RegisterAction.RepeatPasswordChanged -> _repeatPasswordValue.value = action.value
+            is RegisterAction.UsernameChanged -> _usernameValue.value = action.value
         }
     }
 
-    private fun onUsernameChanged(value: String) {
-        _state.update {
-            it.copy(usernameValue = value)
+    private fun onCreateAccountClicked() {
+        if (state.value.buttonEnabled) {
+            viewModelScope.launch {
+                _isLoading.value = true
+                delay(5000)
+                authDataSource.createUser(
+                    username = state.value.usernameValue,
+                    password = state.value.passwordValue,
+                    email = state.value.emailValue
+                )
+            }
         }
     }
 
-    private fun onEmailChanged(value: String) {
-        _state.update {
-            it.copy(emailValue = value)
-        }
+    private fun isValidUsername(username: String): Boolean {
+        return username.length in 3..20
     }
 
-    private fun onPasswordChanged(value: String) {
-        _state.update {
-            it.copy(passwordValue = value)
-        }
+    private fun isValidEmail(email: String): Boolean {
+        return email.matches(emailRegex)
     }
 
-    private fun onRepeatPasswordChanged(value: String) {
-        _state.update {
-            it.copy(repeatPasswordValue = value)
+    private fun isValidPassword(password: String): Boolean {
+        if (password.length < 8) {
+            return false
         }
+        val hasNumberOrSymbol = password.any { it.isDigit() || !it.isLetterOrDigit() }
+        return hasNumberOrSymbol
     }
-
-
-
-
 }
