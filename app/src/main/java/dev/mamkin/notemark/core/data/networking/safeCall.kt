@@ -16,6 +16,7 @@ suspend inline fun <reified T> safeCall(
     } catch(e: UnresolvedAddressException) {
         return Result.Error(NetworkError.NO_INTERNET)
     } catch(e: SerializationException) {
+        println(e)
         return Result.Error(NetworkError.SERIALIZATION)
     } catch(e: Exception) {
         coroutineContext.ensureActive()

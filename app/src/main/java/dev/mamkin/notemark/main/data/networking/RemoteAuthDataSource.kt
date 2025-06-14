@@ -48,9 +48,11 @@ class RemoteAuthDataSource(
             httpClient.post(
                 urlString = constructUrl("/api/auth/login")
             ) {
-                LoginRequest(
-                    email = email,
-                    password = password
+                setBody(
+                    LoginRequest(
+                        email = email,
+                        password = password
+                    )
                 )
             }
         }.map { it -> TokenPair(it.accessToken, it.refreshToken) }
