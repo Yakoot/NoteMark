@@ -1,13 +1,15 @@
 package dev.mamkin.notemark.login.presentation.login
 
-import android.R.attr.password
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.mamkin.notemark.core.domain.util.onError
+import dev.mamkin.notemark.core.domain.util.onSuccess
 import dev.mamkin.notemark.main.domain.AuthDataSource
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -16,6 +18,8 @@ class LoginViewModel(
     private val authDataSource: AuthDataSource
 ) : ViewModel() {
 
+    private val eventChannel = Channel<LoginEvent>()
+    val events = eventChannel.receiveAsFlow()
     private var hasLoadedInitialData = false
 
     private val _state = MutableStateFlow(LoginState())
@@ -46,15 +50,19 @@ class LoginViewModel(
             it.copy(
                 emailValue = value,
                 buttonEnabled = value.isNotBlank() && state.value.passwordValue.isNotBlank()
-            ) }
+            )
+        }
     }
 
     private fun onPasswordChanged(value: String) {
-        _state.update { it.copy(
-            passwordValue = value,
-            buttonEnabled = value.isNotBlank() && state.value.emailValue.isNotBlank()
-        ) }
+        _state.update {
+            it.copy(
+                passwordValue = value,
+                buttonEnabled = value.isNotBlank() && state.value.emailValue.isNotBlank()
+            )
+        }
     }
+
     private fun onLoginClicked() {
         _state.update { it.copy(buttonLoading = true) }
         viewModelScope.launch {
@@ -62,7 +70,14 @@ class LoginViewModel(
                 password = state.value.passwordValue,
                 email = state.value.emailValue
             )
-            _state.update { it.copy(buttonLoading = true) }
+            _state.update { it.copy(buttonLoading = false) }
+            response
+                .onSuccess {
+                    eventChannel.send(LoginEvent.LoginSuccess)
+                }
+                .onError {
+                    eventChannel.send(LoginEvent.LoginError(it))
+                }
         }
     }
 }

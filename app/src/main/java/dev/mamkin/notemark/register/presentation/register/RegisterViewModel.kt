@@ -2,19 +2,24 @@ package dev.mamkin.notemark.register.presentation.register
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.mamkin.notemark.core.domain.util.onError
+import dev.mamkin.notemark.core.domain.util.onSuccess
 import dev.mamkin.notemark.main.domain.AuthDataSource
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class RegisterViewModel(
     private val authDataSource: AuthDataSource
 ) : ViewModel() {
-    private val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\$".toRegex() // Compile regex once
+    private val emailRegex = """^[A-Za-z0-9+_\.-]+@([A-Za-z0-9-]+\.)+[A-Za-z]{2,}$""".toRegex()
+
+    private val eventChannel = Channel<RegisterEvent>()
+    val events = eventChannel.receiveAsFlow()
 
     private val _usernameValue = MutableStateFlow("")
     private val _emailValue = MutableStateFlow("")
@@ -29,13 +34,18 @@ class RegisterViewModel(
         _repeatPasswordValue,
         _isLoading
     ) { username, email, password, repeatPassword, isLoading ->
-        val usernameError = if (username.isEmpty() || isValidUsername(username)) null else "Username must be at least 3 characters."
-        val emailError = if (email.isEmpty() || isValidEmail(email)) null else "Invalid email provided"
-        val passwordError = if (password.isEmpty() || isValidPassword(password)) null else "Password must be at least 8 characters and include a number or symbol."
-        val repeatPasswordError = if (repeatPassword.isEmpty() || password == repeatPassword) null else "Passwords do not match"
+        val usernameError =
+            if (username.isEmpty() || isValidUsername(username)) null else "Username must be at least 3 characters."
+        val emailError =
+            if (email.isEmpty() || isValidEmail(email)) null else "Invalid email provided"
+        val passwordError =
+            if (password.isEmpty() || isValidPassword(password)) null else "Password must be at least 8 characters and include a number or symbol."
+        val repeatPasswordError =
+            if (repeatPassword.isEmpty() || password == repeatPassword) null else "Passwords do not match"
 
-        val isFormValid = usernameError == null && emailError == null && passwordError == null && repeatPasswordError == null
-                && username.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && repeatPassword.isNotEmpty()
+        val isFormValid =
+            usernameError == null && emailError == null && passwordError == null && repeatPasswordError == null
+                    && username.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && repeatPassword.isNotEmpty()
 
 
         RegisterState(
@@ -58,7 +68,9 @@ class RegisterViewModel(
 
     fun onAction(action: RegisterAction) {
         when (action) {
-            RegisterAction.AlreadyHaveAccountClicked -> { /* Handle navigation */ }
+            RegisterAction.AlreadyHaveAccountClicked -> { /* Handle navigation */
+            }
+
             RegisterAction.CreateAccountClicked -> onCreateAccountClicked()
             is RegisterAction.EmailChanged -> _emailValue.value = action.value
             is RegisterAction.PasswordChanged -> _passwordValue.value = action.value
@@ -71,12 +83,19 @@ class RegisterViewModel(
         if (state.value.buttonEnabled) {
             viewModelScope.launch {
                 _isLoading.value = true
-                delay(5000)
-                authDataSource.createUser(
+                val result = authDataSource.createUser(
                     username = state.value.usernameValue,
                     password = state.value.passwordValue,
                     email = state.value.emailValue
                 )
+                _isLoading.value = false
+                result
+                    .onSuccess {
+                        eventChannel.send(RegisterEvent.RegisterSuccess)
+                    }
+                    .onError {
+                        eventChannel.send(RegisterEvent.RegisterError(it))
+                    }
             }
         }
     }

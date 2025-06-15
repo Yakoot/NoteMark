@@ -1,5 +1,6 @@
 package dev.mamkin.notemark.login.presentation.login
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.widthIn
@@ -29,28 +31,46 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component1
+import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component2
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.mamkin.notemark.core.presentation.designsystem.buttons.AppFilledButton
 import dev.mamkin.notemark.core.presentation.designsystem.buttons.AppTextButton
 import dev.mamkin.notemark.core.presentation.designsystem.text_fields.AppTextField
 import dev.mamkin.notemark.core.presentation.designsystem.text_fields.PasswordTextField
 import dev.mamkin.notemark.core.presentation.designsystem.theme.NoteMarkTheme
 import dev.mamkin.notemark.core.presentation.util.DeviceType
+import dev.mamkin.notemark.core.presentation.util.ObserveAsEvents
+import dev.mamkin.notemark.core.presentation.util.toString
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun LoginRoot(
     viewModel: LoginViewModel = koinViewModel(),
-    navigateToRegister: () -> Unit = {}
+    navigateToRegister: () -> Unit = {},
+    navigateToAuthorizedZone: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    ObserveAsEvents(viewModel.events) {
+        when (it) {
+            LoginEvent.LoginSuccess -> navigateToAuthorizedZone()
+            is LoginEvent.LoginError -> {
+                Toast.makeText(
+                    context,
+                    it.error.toString(context),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
 
     LoginScreen(
         state = state,
@@ -76,6 +96,7 @@ fun LoginScreen(
     val deviceType = DeviceType.fromWindowSizeClass(windowSizeClass)
     val hasTopPadding = deviceType == DeviceType.MOBILE_PORTRAIT
     val isTwoColumns = !deviceType.isPortrait()
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.primary,
         modifier = Modifier
@@ -106,8 +127,7 @@ fun LoginScreen(
                         modifier = Modifier.weight(1f)
                     )
                     LoginForm(
-                        modifier = Modifier.weight(1f)
-                            .verticalScroll(rememberScrollState()),
+                        modifier = Modifier.weight(1f),
                         state = state,
                         onAction = onAction
                     )
@@ -129,8 +149,7 @@ fun LoginScreen(
                     Spacer(modifier = Modifier.height(40.dp))
                     LoginForm(
                         modifier = Modifier
-                            .widthIn(max = 560.dp)
-                            .verticalScroll(rememberScrollState()),
+                            .widthIn(max = 560.dp),
                         state = state,
                         onAction = onAction
                     )
@@ -175,6 +194,9 @@ fun LoginForm(
 
     Column(
         modifier = modifier
+            .verticalScroll(rememberScrollState())
+            .navigationBarsPadding()
+            .imePadding()
     ) {
         AppTextField(
             modifier = Modifier
@@ -243,7 +265,7 @@ private fun Preview() {
     NoteMarkTheme {
         LoginScreen(
             state = LoginState(),
-            onAction = {}
+            onAction = {},
         )
     }
 }
