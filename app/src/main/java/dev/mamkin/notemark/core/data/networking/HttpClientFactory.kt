@@ -1,10 +1,10 @@
 package dev.mamkin.notemark.core.data.networking
 
 import dev.mamkin.notemark.BuildConfig
+import dev.mamkin.notemark.auth.data.networking.dto.RefreshTokenRequest
+import dev.mamkin.notemark.auth.data.networking.dto.RefreshTokenResponse
 import dev.mamkin.notemark.core.data.datastore.TokenDataStore
 import dev.mamkin.notemark.core.domain.util.Result
-import dev.mamkin.notemark.main.data.networking.dto.RefreshTokenRequest
-import dev.mamkin.notemark.main.data.networking.dto.RefreshTokenResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.auth.Auth
@@ -21,7 +21,6 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import io.ktor.http.headers
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json

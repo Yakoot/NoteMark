@@ -2,9 +2,9 @@ package dev.mamkin.notemark.login.presentation.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.mamkin.notemark.auth.domain.AuthDataSource
 import dev.mamkin.notemark.core.domain.util.onError
 import dev.mamkin.notemark.core.domain.util.onSuccess
-import dev.mamkin.notemark.main.domain.AuthDataSource
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

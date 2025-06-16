@@ -1,4 +1,4 @@
-package dev.mamkin.notemark.main.domain
+package dev.mamkin.notemark.auth.domain
 
 data class TokenPair(
     val accessToken: String,

@@ -1,4 +1,4 @@
-package dev.mamkin.notemark.main.data.networking.dto
+package dev.mamkin.notemark.auth.data.networking.dto
 
 import kotlinx.serialization.Serializable
 

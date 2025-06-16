@@ -1,5 +1,10 @@
-package dev.mamkin.notemark.main.data.networking
+package dev.mamkin.notemark.auth.data.networking
 
+import dev.mamkin.notemark.auth.data.networking.dto.CreateUserRequest
+import dev.mamkin.notemark.auth.data.networking.dto.LoginRequest
+import dev.mamkin.notemark.auth.data.networking.dto.LoginResponse
+import dev.mamkin.notemark.auth.domain.AuthDataSource
+import dev.mamkin.notemark.auth.domain.TokenPair
 import dev.mamkin.notemark.core.data.datastore.TokenDataStore
 import dev.mamkin.notemark.core.data.networking.constructUrl
 import dev.mamkin.notemark.core.data.networking.safeCall
@@ -8,11 +13,6 @@ import dev.mamkin.notemark.core.domain.util.NetworkError
 import dev.mamkin.notemark.core.domain.util.Result
 import dev.mamkin.notemark.core.domain.util.map
 import dev.mamkin.notemark.core.domain.util.onSuccess
-import dev.mamkin.notemark.main.data.networking.dto.CreateUserRequest
-import dev.mamkin.notemark.main.data.networking.dto.LoginRequest
-import dev.mamkin.notemark.main.data.networking.dto.LoginResponse
-import dev.mamkin.notemark.main.domain.AuthDataSource
-import dev.mamkin.notemark.main.domain.TokenPair
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody

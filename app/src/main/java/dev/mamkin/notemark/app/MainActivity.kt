@@ -24,13 +24,10 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import dev.mamkin.notemark.core.presentation.designsystem.theme.NoteMarkTheme
-import dev.mamkin.notemark.app.di.appModule
 import dev.mamkin.notemark.landing.presentation.landing.LandingRoot
 import dev.mamkin.notemark.login.presentation.login.LoginRoot
 import dev.mamkin.notemark.register.presentation.register.RegisterRoot
 import kotlinx.serialization.Serializable
-import org.koin.android.ext.koin.androidContext
-import org.koin.core.context.startKoin
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

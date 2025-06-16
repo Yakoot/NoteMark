@@ -1,4 +1,4 @@
-package dev.mamkin.notemark.main.domain
+package dev.mamkin.notemark.auth.domain
 
 import dev.mamkin.notemark.core.domain.util.EmptyResult
 import dev.mamkin.notemark.core.domain.util.NetworkError

@@ -2,8 +2,8 @@ package dev.mamkin.notemark.core.presentation.util
 
 
 import android.content.Context
-import dev.mamkin.notemark.core.domain.util.NetworkError
 import dev.mamkin.notemark.R
+import dev.mamkin.notemark.core.domain.util.NetworkError
 
 fun NetworkError.toString(context: Context): String {
     val resId = when(this) {
