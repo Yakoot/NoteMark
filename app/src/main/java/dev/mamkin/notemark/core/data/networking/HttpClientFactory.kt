@@ -56,6 +56,7 @@ object HttpClientFactory {
                                 )
                                 markAsRefreshTokenRequest()
 //                            header("Debug", true)
+//                            header("Debug", true)
                             }
                         }
                         if (response is Result.Success<RefreshTokenResponse>) {

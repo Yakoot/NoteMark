@@ -23,6 +23,7 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import dev.mamkin.notemark.app.navigation.MainScreen
 import dev.mamkin.notemark.core.presentation.designsystem.theme.NoteMarkTheme
 import dev.mamkin.notemark.landing.presentation.landing.LandingRoot
 import dev.mamkin.notemark.login.presentation.login.LoginRoot
@@ -41,85 +42,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-@Composable
-fun MainScreen(modifier: Modifier = Modifier) {
-    val backStack = rememberNavBackStack(Landing)
-    NavDisplay(
-        modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainerLowest),
-        backStack = backStack,
-        onBack = { backStack.removeLastOrNull() },
-        entryProvider = { key ->
-            when (key) {
-                is Landing -> NavEntry(key) {
-                    LandingRoot(
-                        navigateToRegister = {
-                            backStack.add(Register)
-                            backStack.remove(Landing)
-                        },
-                        navigateToLogin = {
-                            backStack.add(Login)
-                            backStack.remove(Landing)
-                        }
-                    )
-                }
-
-                is Login -> NavEntry(key) {
-                    LoginRoot(
-                        navigateToRegister = {
-                            backStack.add(Register)
-                            backStack.remove(Register)
-                        },
-                        navigateToAuthorizedZone = {
-                            backStack.add(BlankPageAfterLogIn)
-                            backStack.remove(Login)
-                        }
-                    )
-                }
-
-                is Register -> NavEntry(key) {
-                    RegisterRoot(
-                        navigateToLogin = {
-                            backStack.remove(Login)
-                            backStack.add(Login)
-                        }
-                    )
-                }
-
-                is BlankPageAfterLogIn -> NavEntry(key) {
-                    Scaffold(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        contentWindowInsets = WindowInsets.statusBars
-                    ) { innerPadding ->
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(innerPadding),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                style = MaterialTheme.typography.bodyLarge,
-                                text = "You are successfully logged in!",
-                                color = Color.White
-                            )
-                        }
-                    }
-                }
-
-                else -> throw IllegalArgumentException("Unknown key: $key")
-            }
-        }
-    )
-
-}
-
-@Serializable
-data object Landing: NavKey
-@Serializable
-data object Login: NavKey
-@Serializable
-data object Register: NavKey
-data object BlankPageAfterLogIn: NavKey
