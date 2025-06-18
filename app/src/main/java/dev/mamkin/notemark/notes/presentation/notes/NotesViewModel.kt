@@ -2,12 +2,17 @@ package dev.mamkin.notemark.notes.presentation.notes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.mamkin.notemark.core.data.datastore.UserProfileDataStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class NotesViewModel : ViewModel() {
+class NotesViewModel(
+    private val userProfileDataStore: UserProfileDataStore
+) : ViewModel() {
 
     private var hasLoadedInitialData = false
 
@@ -24,6 +29,15 @@ class NotesViewModel : ViewModel() {
             started = SharingStarted.WhileSubscribed(5_000L),
             initialValue = NotesState()
         )
+
+    init {
+        viewModelScope.launch {
+            userProfileDataStore.usernameFlow
+                .collect { newUsername ->
+                    _state.update { it.copy(username = newUsername) }
+                }
+        }
+    }
 
     fun onAction(action: NotesAction) {
         when (action) {

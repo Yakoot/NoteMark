@@ -5,6 +5,7 @@ import dev.mamkin.notemark.app.navigation.MainScreenViewModel
 import dev.mamkin.notemark.auth.data.networking.RemoteAuthDataSource
 import dev.mamkin.notemark.auth.domain.AuthDataSource
 import dev.mamkin.notemark.core.data.datastore.TokenDataStore
+import dev.mamkin.notemark.core.data.datastore.UserProfileDataStore
 import dev.mamkin.notemark.core.data.networking.HttpClientFactory
 import dev.mamkin.notemark.login.presentation.login.LoginViewModel
 import dev.mamkin.notemark.notes.data.KtorRemoteNotesDataSource
@@ -27,6 +28,7 @@ val appModule = module {
     singleOf(::RemoteAuthDataSource).bind<AuthDataSource>()
     singleOf(::KtorRemoteNotesDataSource).bind<RemoteNotesDataSource>()
     singleOf(::TokenDataStore)
+    singleOf(::UserProfileDataStore)
 
     viewModelOf(::RegisterViewModel)
     viewModelOf(::LoginViewModel)

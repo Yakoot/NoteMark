@@ -10,5 +10,5 @@ interface AuthDataSource {
         password: String,
         email: String
     ): EmptyResult<NetworkError>
-    suspend fun login(email: String, password: String): Result<TokenPair, NetworkError>
+    suspend fun login(email: String, password: String): EmptyResult<NetworkError>
 }
