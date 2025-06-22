@@ -2,6 +2,7 @@ package dev.mamkin.notemark.app
 
 import android.app.Application
 import dev.mamkin.notemark.app.di.appModule
+import dev.mamkin.notemark.core.database.di.databaseModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -16,7 +17,7 @@ class NoteMarkApp : Application() {
 
         startKoin {
             androidContext(this@NoteMarkApp)
-            modules(appModule)
+            modules(appModule, databaseModule)
         }
     }
 }

@@ -21,6 +21,7 @@ import androidx.navigation3.ui.NavDisplay
 import dev.mamkin.notemark.core.presentation.util.ObserveAsEvents
 import dev.mamkin.notemark.landing.presentation.landing.LandingRoot
 import dev.mamkin.notemark.login.presentation.login.LoginRoot
+import dev.mamkin.notemark.notes.presentation.createNote.CreateNoteRoot
 import dev.mamkin.notemark.notes.presentation.notes.NotesRoot
 import dev.mamkin.notemark.register.presentation.register.RegisterRoot
 import kotlinx.serialization.Serializable
@@ -85,7 +86,19 @@ fun MainScreen(
                 }
 
                 is Notes -> NavEntry(key) {
-                    NotesRoot()
+                    NotesRoot(
+                        navigateToCreateNote = {
+                            backStack.add(CreateNote)
+                        }
+                    )
+                }
+
+                is CreateNote -> NavEntry(key) {
+                    CreateNoteRoot(
+                        navigateBack = {
+                            backStack.remove(CreateNote)
+                        }
+                    )
                 }
 
                 else -> throw IllegalArgumentException("Unknown key: $key")
@@ -103,3 +116,5 @@ data object Login: NavKey
 data object Register: NavKey
 @Serializable
 data object Notes: NavKey
+@Serializable
+data object CreateNote: NavKey
