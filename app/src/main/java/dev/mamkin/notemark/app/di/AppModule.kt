@@ -9,7 +9,12 @@ import dev.mamkin.notemark.core.data.datastore.UserProfileDataStore
 import dev.mamkin.notemark.core.data.networking.HttpClientFactory
 import dev.mamkin.notemark.login.presentation.login.LoginViewModel
 import dev.mamkin.notemark.notes.data.KtorRemoteNotesDataSource
+import dev.mamkin.notemark.notes.data.NotesRepositoryImpl
+import dev.mamkin.notemark.notes.data.RoomLocalNotesDataSource
+import dev.mamkin.notemark.notes.domain.LocalNotesDataSource
+import dev.mamkin.notemark.notes.domain.NotesRepository
 import dev.mamkin.notemark.notes.domain.RemoteNotesDataSource
+import dev.mamkin.notemark.notes.presentation.createNote.CreateNoteViewModel
 import dev.mamkin.notemark.notes.presentation.notes.NotesViewModel
 import dev.mamkin.notemark.register.presentation.register.RegisterViewModel
 import io.ktor.client.engine.cio.CIO
@@ -27,11 +32,15 @@ val appModule = module {
     single { HttpClientFactory.create(CIO.create(), get()) }
     singleOf(::RemoteAuthDataSource).bind<AuthDataSource>()
     singleOf(::KtorRemoteNotesDataSource).bind<RemoteNotesDataSource>()
+    singleOf(::RoomLocalNotesDataSource).bind<LocalNotesDataSource>()
+    singleOf(::NotesRepositoryImpl).bind<NotesRepository>()
     singleOf(::TokenDataStore)
+    singleOf(::UserProfileDataStore)
     singleOf(::UserProfileDataStore)
 
     viewModelOf(::RegisterViewModel)
     viewModelOf(::LoginViewModel)
     viewModelOf(::NotesViewModel)
     viewModelOf(::MainScreenViewModel)
+    viewModelOf(::CreateNoteViewModel)
 }

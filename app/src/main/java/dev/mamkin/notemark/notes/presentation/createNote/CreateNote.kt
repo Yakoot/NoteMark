@@ -1,5 +1,6 @@
 package dev.mamkin.notemark.notes.presentation.createNote
 
+import android.R.attr.maxLines
 import android.R.attr.text
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,10 +32,11 @@ import dev.mamkin.notemark.core.presentation.designsystem.text_fields.Transparen
 import dev.mamkin.notemark.core.presentation.designsystem.theme.NoteMarkTheme
 import dev.mamkin.notemark.core.presentation.designsystem.theme.topBarAction
 import dev.mamkin.notemark.notes.presentation.notes.components.ProfileIcon
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun CreateNoteRoot(
-    viewModel: CreateNoteViewModel = viewModel(),
+    viewModel: CreateNoteViewModel = koinViewModel(),
     navigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -79,7 +81,10 @@ fun CreateNoteScreen(
                     Text(
                         text = "SAVE NOTE",
                         style = MaterialTheme.typography.topBarAction,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.clickable {
+                            onAction(CreateNoteAction.SaveNote)
+                        }
                     )
                 }
             )
@@ -114,7 +119,8 @@ fun CreateNoteScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 ),
                 hintText = "Note content",
-                modifier = Modifier
+                modifier = Modifier,
+                maxLines = Int.MAX_VALUE
             )
         }
     }

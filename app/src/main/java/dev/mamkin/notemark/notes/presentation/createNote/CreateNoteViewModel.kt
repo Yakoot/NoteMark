@@ -2,6 +2,7 @@ package dev.mamkin.notemark.notes.presentation.createNote
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.mamkin.notemark.notes.domain.LocalNotesDataSource
 import dev.mamkin.notemark.notes.domain.RemoteNotesDataSource
 import dev.mamkin.notemark.notes.domain.models.Note
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,9 +10,11 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class CreateNoteViewModel(
-    private val remoteNotesDataSource: RemoteNotesDataSource
+    private val remoteNotesDataSource: RemoteNotesDataSource,
+    private val localNotesDataSource: LocalNotesDataSource
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -35,7 +38,7 @@ class CreateNoteViewModel(
             is CreateNoteAction.OnTitleChange -> onTitleChange(action.value)
             is CreateNoteAction.OnContentChange -> onContentChange(action.value)
             is CreateNoteAction.SaveNote -> {
-
+                saveNote()
             }
             else -> TODO("Handle actions")
         }
@@ -49,14 +52,10 @@ class CreateNoteViewModel(
         _state.update { it.copy(content = value) }
     }
 
-    private suspend fun saveNote() {
-//        val note = Note(
-//            title = state.value.title,
-//            content = state.value.content
-//        )
-//        remoteNotesDataSource.createNote(
-//            Note
-//        )
+    private fun saveNote() {
+        viewModelScope.launch {
+            localNotesDataSource.insertNote(title = state.value.title, content = state.value.content)
+        }
     }
 
 }
