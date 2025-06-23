@@ -33,6 +33,7 @@ fun CreateNoteRoot(
     navigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
     CreateNoteScreen(
         state = state,
         onAction = {
