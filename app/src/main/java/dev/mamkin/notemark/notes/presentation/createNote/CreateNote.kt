@@ -2,9 +2,14 @@ package dev.mamkin.notemark.notes.presentation.createNote
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -18,8 +23,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.mamkin.notemark.core.presentation.designsystem.text_fields.TransparentHintTextField
 import dev.mamkin.notemark.core.presentation.designsystem.theme.NoteMarkTheme
@@ -82,7 +91,34 @@ fun CreateNoteScreen(
         }
 
         DeviceType.MOBILE_LANDSCAPE -> {
-
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                TopBar(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .offset(y = -12.dp)
+                    ,
+                    closeButtonPadding = 44.dp,
+                    onCloseClick = {
+                        onAction(CreateNoteAction.Close)
+                    },
+                    onSaveClick = {
+                        onAction(CreateNoteAction.SaveNote)
+                    }
+                )
+                NoteForm(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .widthIn(max = 540.dp)
+                    ,
+                    title = state.title,
+                    onTitleChange = { onAction(CreateNoteAction.OnTitleChange(it)) },
+                    content = state.content,
+                    onContentChange = { onAction(CreateNoteAction.OnContentChange(it)) }
+                )
+            }
         }
 
         DeviceType.TABLET_PORTRAIT,
@@ -93,6 +129,8 @@ fun CreateNoteScreen(
                 topBar = {
                     TopBar(
                         modifier = Modifier,
+                        saveButtonPadding = 24.dp,
+                        closeButtonPadding = 8.dp,
                         onCloseClick = {
                             onAction(CreateNoteAction.Close)
                         },
@@ -156,6 +194,8 @@ private fun NoteForm(
 @Composable
 private fun TopBar(
     modifier: Modifier = Modifier,
+    saveButtonPadding: Dp = 16.dp,
+    closeButtonPadding: Dp = 0.dp,
     onCloseClick: () -> Unit,
     onSaveClick: () -> Unit
 ) {
@@ -163,7 +203,9 @@ private fun TopBar(
         modifier = modifier,
         title = {
             Icon(
-                modifier = Modifier.clickable(onClick = onCloseClick),
+                modifier = Modifier
+                    .padding(start = closeButtonPadding)
+                    .clickable(onClick = onCloseClick),
                 imageVector = Icons.Rounded.Close,
                 contentDescription = "Close",
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -178,7 +220,9 @@ private fun TopBar(
                 text = "SAVE NOTE",
                 style = MaterialTheme.typography.topBarAction,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable(onClick = onSaveClick)
+                modifier = Modifier
+                    .padding(end = saveButtonPadding)
+                    .clickable(onClick = onSaveClick)
             )
         }
     )

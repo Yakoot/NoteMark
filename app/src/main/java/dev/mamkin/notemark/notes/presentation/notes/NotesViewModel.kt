@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dev.mamkin.notemark.core.data.datastore.UserProfileDataStore
 import dev.mamkin.notemark.core.domain.util.onSuccess
 import dev.mamkin.notemark.notes.domain.NotesRepository
+import dev.mamkin.notemark.notes.presentation.notes.models.toUIModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
@@ -40,7 +41,7 @@ class NotesViewModel(
     private fun observeNotes() {
         viewModelScope.launch {
             notesRepository.observeNotes().collect { notes ->
-                _state.update { it.copy(notes = notes) }
+                _state.update { it.copy(notes = notes.map { it.toUIModel() }) }
             }
         }
     }

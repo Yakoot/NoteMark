@@ -1,8 +1,8 @@
 package dev.mamkin.notemark.notes.presentation.notes
 
-import dev.mamkin.notemark.notes.domain.models.Note
+import dev.mamkin.notemark.notes.presentation.notes.models.NoteUIModel
 
 data class NotesState(
     val username: String = "",
-    val notes: List<Note> = emptyList()
+    val notes: List<NoteUIModel> = emptyList()
 )

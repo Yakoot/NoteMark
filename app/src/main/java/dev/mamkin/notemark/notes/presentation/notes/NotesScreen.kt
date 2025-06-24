@@ -42,6 +42,7 @@ import dev.mamkin.notemark.core.presentation.util.DeviceType
 import dev.mamkin.notemark.notes.domain.models.Note
 import dev.mamkin.notemark.notes.presentation.notes.components.NoteCard
 import dev.mamkin.notemark.notes.presentation.notes.components.ProfileIcon
+import dev.mamkin.notemark.notes.presentation.notes.models.NoteUIModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -151,7 +152,8 @@ fun NotesScreen(
                     NotesGrid(
                         contentPadding = it,
                         notes = state.notes,
-                        onNoteClick = { onAction(NotesAction.OpenNote(it.id)) }
+                        onNoteClick = { onAction(NotesAction.OpenNote(it.id)) },
+                        isTablet = true
                     )
                 }
 
@@ -187,7 +189,7 @@ private fun CreateNoteButton(
     onClick: () -> Unit,
 ) {
     FloatingActionButton(
-        modifier = Modifier.size(64.dp),
+        modifier = modifier.size(64.dp),
         onClick = onClick,
         containerColor = Color.Transparent,
         elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp)
@@ -243,9 +245,10 @@ private fun TopBar(
 @Composable
 private fun NotesGrid(
     modifier: Modifier = Modifier,
-    notes: List<Note>,
-    onNoteClick: (Note) -> Unit,
+    notes: List<NoteUIModel>,
+    onNoteClick: (NoteUIModel) -> Unit,
     columnCount: Int = 2,
+    isTablet: Boolean = false,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     LazyVerticalStaggeredGrid(
@@ -259,9 +262,10 @@ private fun NotesGrid(
     ) {
         items(notes) {
             NoteCard(
-                date = it.createdAt.toString(),
+                date = it.date,
                 title = it.title,
-                content = it.content
+                content = it.content,
+                isTablet = isTablet
             )
         }
     }
