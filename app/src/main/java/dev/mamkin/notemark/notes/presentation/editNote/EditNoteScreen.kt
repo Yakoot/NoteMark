@@ -1,4 +1,4 @@
-package dev.mamkin.notemark.notes.presentation.createNote
+package dev.mamkin.notemark.notes.presentation.editNote
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -35,19 +34,21 @@ import dev.mamkin.notemark.core.presentation.designsystem.theme.NoteMarkTheme
 import dev.mamkin.notemark.core.presentation.designsystem.theme.topBarAction
 import dev.mamkin.notemark.core.presentation.util.DeviceType
 import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
-fun CreateNoteRoot(
-    viewModel: CreateNoteViewModel = koinViewModel(),
+fun EditNoteRoot(
+    id: String,
+    viewModel: EditNoteViewModel = koinViewModel(parameters = { parametersOf(id) }),
     navigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    CreateNoteScreen(
+    EditNoteScreen(
         state = state,
         onAction = {
             when (it) {
-                CreateNoteAction.Close -> navigateBack()
+                EditNoteAction.Close -> navigateBack()
                 else -> {
                     viewModel.onAction(it)
                 }
@@ -58,9 +59,9 @@ fun CreateNoteRoot(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateNoteScreen(
-    state: CreateNoteState,
-    onAction: (CreateNoteAction) -> Unit,
+fun EditNoteScreen(
+    state: EditNoteState,
+    onAction: (EditNoteAction) -> Unit,
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val deviceType = DeviceType.fromWindowSizeClass(windowSizeClass)
@@ -72,10 +73,10 @@ fun CreateNoteScreen(
                     TopBar(
                         modifier = Modifier,
                         onCloseClick = {
-                            onAction(CreateNoteAction.Close)
+                            onAction(EditNoteAction.Close)
                         },
                         onSaveClick = {
-                            onAction(CreateNoteAction.SaveNote)
+                            onAction(EditNoteAction.SaveNote)
                         }
                     )
                 }
@@ -83,9 +84,9 @@ fun CreateNoteScreen(
                 NoteForm(
                     modifier = Modifier.padding(it),
                     title = state.title,
-                    onTitleChange = { onAction(CreateNoteAction.OnTitleChange(it)) },
+                    onTitleChange = { onAction(EditNoteAction.OnTitleChange(it)) },
                     content = state.content,
-                    onContentChange = { onAction(CreateNoteAction.OnContentChange(it)) }
+                    onContentChange = { onAction(EditNoteAction.OnContentChange(it)) }
                 )
             }
         }
@@ -102,10 +103,10 @@ fun CreateNoteScreen(
                     ,
                     closeButtonPadding = 44.dp,
                     onCloseClick = {
-                        onAction(CreateNoteAction.Close)
+                        onAction(EditNoteAction.Close)
                     },
                     onSaveClick = {
-                        onAction(CreateNoteAction.SaveNote)
+                        onAction(EditNoteAction.SaveNote)
                     }
                 )
                 NoteForm(
@@ -114,9 +115,9 @@ fun CreateNoteScreen(
                         .widthIn(max = 540.dp)
                     ,
                     title = state.title,
-                    onTitleChange = { onAction(CreateNoteAction.OnTitleChange(it)) },
+                    onTitleChange = { onAction(EditNoteAction.OnTitleChange(it)) },
                     content = state.content,
-                    onContentChange = { onAction(CreateNoteAction.OnContentChange(it)) }
+                    onContentChange = { onAction(EditNoteAction.OnContentChange(it)) }
                 )
             }
         }
@@ -132,10 +133,10 @@ fun CreateNoteScreen(
                         saveButtonPadding = 24.dp,
                         closeButtonPadding = 8.dp,
                         onCloseClick = {
-                            onAction(CreateNoteAction.Close)
+                            onAction(EditNoteAction.Close)
                         },
                         onSaveClick = {
-                            onAction(CreateNoteAction.SaveNote)
+                            onAction(EditNoteAction.SaveNote)
                         }
                     )
                 }
@@ -143,9 +144,9 @@ fun CreateNoteScreen(
                 NoteForm(
                     modifier = Modifier.padding(it),
                     title = state.title,
-                    onTitleChange = { onAction(CreateNoteAction.OnTitleChange(it)) },
+                    onTitleChange = { onAction(EditNoteAction.OnTitleChange(it)) },
                     content = state.content,
-                    onContentChange = { onAction(CreateNoteAction.OnContentChange(it)) }
+                    onContentChange = { onAction(EditNoteAction.OnContentChange(it)) }
                 )
             }
         }
@@ -232,8 +233,8 @@ private fun TopBar(
 @Composable
 private fun Preview() {
     NoteMarkTheme {
-        CreateNoteScreen(
-            state = CreateNoteState(),
+        EditNoteScreen(
+            state = EditNoteState(),
             onAction = {}
         )
     }

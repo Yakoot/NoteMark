@@ -1,19 +1,9 @@
 package dev.mamkin.notemark.app.navigation
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -21,7 +11,7 @@ import androidx.navigation3.ui.NavDisplay
 import dev.mamkin.notemark.core.presentation.util.ObserveAsEvents
 import dev.mamkin.notemark.landing.presentation.landing.LandingRoot
 import dev.mamkin.notemark.login.presentation.login.LoginRoot
-import dev.mamkin.notemark.notes.presentation.createNote.CreateNoteRoot
+import dev.mamkin.notemark.notes.presentation.editNote.EditNoteRoot
 import dev.mamkin.notemark.notes.presentation.notes.NotesRoot
 import dev.mamkin.notemark.register.presentation.register.RegisterRoot
 import kotlinx.serialization.Serializable
@@ -87,16 +77,17 @@ fun MainScreen(
 
                 is Notes -> NavEntry(key) {
                     NotesRoot(
-                        navigateToCreateNote = {
-                            backStack.add(CreateNote)
+                        navigateToEditNote = {
+                            backStack.add(EditNote(id = it))
                         }
                     )
                 }
 
-                is CreateNote -> NavEntry(key) {
-                    CreateNoteRoot(
+                is EditNote -> NavEntry(key) {
+                    EditNoteRoot(
+                        id = key.id,
                         navigateBack = {
-                            backStack.remove(CreateNote)
+                            backStack.removeLastOrNull()
                         }
                     )
                 }
@@ -117,4 +108,4 @@ data object Register: NavKey
 @Serializable
 data object Notes: NavKey
 @Serializable
-data object CreateNote: NavKey
+data class EditNote(val id: String): NavKey

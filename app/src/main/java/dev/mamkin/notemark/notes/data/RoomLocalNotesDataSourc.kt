@@ -31,21 +31,32 @@ import kotlin.uuid.Uuid
 class RoomLocalNotesDataSource(
     private val notesDao: NotesDao,
 ) : LocalNotesDataSource {
-    override suspend fun insertNote(title: String, content: String) {
+    override suspend fun insertNote(title: String, content: String): Note {
         val uuid = Uuid.random()
         val time = Clock.System.now()
-        val note = NoteEntity(
+        val entity = NoteEntity(
             id = uuid,
             title = title,
             content = content,
             createdAt = time.toEpochMilliseconds(),
             lastEditedAt = time.toEpochMilliseconds()
         )
-        notesDao.insertNote(note)
+        notesDao.insertNote(entity)
+
+        return entity.toNote()
+    }
+
+    override suspend fun deleteNote(id: String) {
+        val note = notesDao.getNoteById(id)
+        note?.let { notesDao.deleteNote(it) }
     }
 
     override fun getNotes(): Flow<List<Note>> {
         return notesDao.observeNotes().map { it.map { it.toNote() } }
+    }
+
+    override suspend fun getNote(id: String): Note? {
+        return notesDao.getNoteById(id)?.toNote()
     }
 
 }

@@ -1,10 +1,10 @@
-package dev.mamkin.notemark.notes.presentation.createNote
+package dev.mamkin.notemark.notes.presentation.editNote
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.mamkin.notemark.notes.domain.LocalNotesDataSource
+import dev.mamkin.notemark.notes.domain.NotesRepository
 import dev.mamkin.notemark.notes.domain.RemoteNotesDataSource
-import dev.mamkin.notemark.notes.domain.models.Note
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
@@ -12,17 +12,18 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class CreateNoteViewModel(
-    private val remoteNotesDataSource: RemoteNotesDataSource,
-    private val localNotesDataSource: LocalNotesDataSource
+class EditNoteViewModel(
+    private val id: String,
+    private val notesRepository: NotesRepository,
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
 
-    private val _state = MutableStateFlow(CreateNoteState())
+    private val _state = MutableStateFlow(EditNoteState())
     val state = _state
         .onStart {
             if (!hasLoadedInitialData) {
+                loadNote()
                 /** Load initial data here **/
                 hasLoadedInitialData = true
             }
@@ -30,14 +31,26 @@ class CreateNoteViewModel(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = CreateNoteState()
+            initialValue = EditNoteState()
         )
 
-    fun onAction(action: CreateNoteAction) {
+    private suspend fun loadNote() {
+        val note = notesRepository.getNote(id)
+        note?.let {
+            _state.update {
+                it.copy(
+                    title = note.title,
+                    content = note.content
+                )
+            }
+        }
+    }
+
+    fun onAction(action: EditNoteAction) {
         when (action) {
-            is CreateNoteAction.OnTitleChange -> onTitleChange(action.value)
-            is CreateNoteAction.OnContentChange -> onContentChange(action.value)
-            is CreateNoteAction.SaveNote -> {
+            is EditNoteAction.OnTitleChange -> onTitleChange(action.value)
+            is EditNoteAction.OnContentChange -> onContentChange(action.value)
+            is EditNoteAction.SaveNote -> {
                 saveNote()
             }
             else -> TODO("Handle actions")
@@ -54,7 +67,7 @@ class CreateNoteViewModel(
 
     private fun saveNote() {
         viewModelScope.launch {
-            localNotesDataSource.insertNote(title = state.value.title, content = state.value.content)
+//            localNotesDataSource.insertNote(title = state.value.title, content = state.value.content)
         }
     }
 

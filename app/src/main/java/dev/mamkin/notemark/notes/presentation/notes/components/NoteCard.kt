@@ -1,5 +1,6 @@
 package dev.mamkin.notemark.notes.presentation.notes.components
 
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -10,6 +11,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
@@ -20,8 +23,11 @@ fun NoteCard(
     date: String,
     title: String,
     content: String,
-    isTablet: Boolean = false
+    onLongClick: () -> Unit,
+    onClick: () -> Unit,
+    isTablet: Boolean = false,
 ) {
+    val haptics = LocalHapticFeedback.current
     val maxChars = if (isTablet) 250 else 150
     val previewText = if (content.length > maxChars) {
         content.take(maxChars).trimEnd() + "…"
@@ -29,7 +35,14 @@ fun NoteCard(
         content
     }
     Card(
-        modifier = modifier,
+        modifier = modifier
+            .combinedClickable(
+                onLongClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onLongClick()
+                },
+                onClick = onClick,
+            ),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
         ),

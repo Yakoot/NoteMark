@@ -3,29 +3,46 @@ package dev.mamkin.notemark.notes.presentation.notes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -39,7 +56,9 @@ import dev.mamkin.notemark.core.presentation.designsystem.theme.FabGradientEnd
 import dev.mamkin.notemark.core.presentation.designsystem.theme.FabGradientStart
 import dev.mamkin.notemark.core.presentation.designsystem.theme.NoteMarkTheme
 import dev.mamkin.notemark.core.presentation.util.DeviceType
+import dev.mamkin.notemark.core.presentation.util.ObserveAsEvents
 import dev.mamkin.notemark.notes.domain.models.Note
+import dev.mamkin.notemark.notes.presentation.notes.components.DeleteNoteConfirmationDialog
 import dev.mamkin.notemark.notes.presentation.notes.components.NoteCard
 import dev.mamkin.notemark.notes.presentation.notes.components.ProfileIcon
 import dev.mamkin.notemark.notes.presentation.notes.models.NoteUIModel
@@ -48,15 +67,20 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun NotesRoot(
     viewModel: NotesViewModel = koinViewModel(),
-    navigateToCreateNote: () -> Unit,
+    navigateToEditNote: (String) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    ObserveAsEvents(viewModel.events) {
+        when(it) {
+            is NotesEvent.NavigateToEdit -> navigateToEditNote(it.id)
+        }
+    }
 
     NotesScreen(
         state = state,
         onAction = {
             when (it) {
-                is NotesAction.CreateNote -> navigateToCreateNote()
                 else -> viewModel.onAction(it)
             }
         }
@@ -71,6 +95,29 @@ fun NotesScreen(
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val deviceType = DeviceType.fromWindowSizeClass(windowSizeClass)
+    var openAlertDialog by remember { mutableStateOf(false) }
+    var idToDelete by remember { mutableStateOf<String?>(null) }
+
+    val onNoteLongClick = remember {
+        { note: NoteUIModel ->
+            idToDelete = note.id
+            openAlertDialog = true
+        }
+    }
+
+    if (openAlertDialog) {
+        DeleteNoteConfirmationDialog(
+            onDismissRequest = {
+                openAlertDialog = false
+                idToDelete = null
+            },
+            onConfirm = {
+                idToDelete?.let { onAction(NotesAction.DeleteNote(it)) }
+                openAlertDialog = false
+                idToDelete = null
+            }
+        )
+    }
 
     when (deviceType) {
         DeviceType.MOBILE_PORTRAIT -> {
@@ -93,7 +140,8 @@ fun NotesScreen(
                     NotesGrid(
                         contentPadding = it,
                         notes = state.notes,
-                        onNoteClick = { onAction(NotesAction.OpenNote(it.id)) }
+                        onNoteClick = { onAction(NotesAction.OpenNote(it.id)) },
+                        onNoteLongClick = { onNoteLongClick(it) }
                     )
                 }
 
@@ -121,7 +169,8 @@ fun NotesScreen(
                     NotesGrid(
                         contentPadding = it,
                         notes = state.notes,
-                        onNoteClick = { onAction(NotesAction.OpenNote(it.id)) }
+                        onNoteClick = { onAction(NotesAction.OpenNote(it.id)) },
+                        onNoteLongClick = { onNoteLongClick(it) }
                     )
                 }
 
@@ -153,6 +202,7 @@ fun NotesScreen(
                         contentPadding = it,
                         notes = state.notes,
                         onNoteClick = { onAction(NotesAction.OpenNote(it.id)) },
+                        onNoteLongClick = { onNoteLongClick(it) },
                         isTablet = true
                     )
                 }
@@ -247,6 +297,7 @@ private fun NotesGrid(
     modifier: Modifier = Modifier,
     notes: List<NoteUIModel>,
     onNoteClick: (NoteUIModel) -> Unit,
+    onNoteLongClick: (NoteUIModel) -> Unit,
     columnCount: Int = 2,
     isTablet: Boolean = false,
     contentPadding: PaddingValues = PaddingValues(0.dp),
@@ -265,7 +316,9 @@ private fun NotesGrid(
                 date = it.date,
                 title = it.title,
                 content = it.content,
-                isTablet = isTablet
+                isTablet = isTablet,
+                onClick = { onNoteClick(it) },
+                onLongClick = { onNoteLongClick(it) }
             )
         }
     }

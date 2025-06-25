@@ -6,9 +6,12 @@ import dev.mamkin.notemark.core.data.datastore.UserProfileDataStore
 import dev.mamkin.notemark.core.domain.util.onSuccess
 import dev.mamkin.notemark.notes.domain.NotesRepository
 import dev.mamkin.notemark.notes.presentation.notes.models.toUIModel
+import dev.mamkin.notemark.register.presentation.register.RegisterEvent
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -19,6 +22,9 @@ class NotesViewModel(
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
+
+    private val eventChannel = Channel<NotesEvent>()
+    val events = eventChannel.receiveAsFlow()
 
     private val _state = MutableStateFlow(NotesState())
     val state = _state
@@ -55,17 +61,27 @@ class NotesViewModel(
         }
     }
 
-//    private suspend fun loadNotes() {
-//        val response = remoteNotesDataSource.getNotes()
-//
-//        response.onSuccess { notes ->
-//            _state.update { it.copy(notes = notes) }
-//        }
-//    }
-
     fun onAction(action: NotesAction) {
         when (action) {
+            is NotesAction.DeleteNote -> onDeleteNote(action.id)
+            NotesAction.CreateNote -> onCreateNote()
             else -> TODO("Handle actions")
+        }
+    }
+
+    private fun onCreateNote() {
+        viewModelScope.launch {
+            val note = notesRepository.createNote(
+                title = "Note title",
+                content = ""
+            )
+            eventChannel.send(NotesEvent.NavigateToEdit(note.id))
+        }
+    }
+
+    private fun onDeleteNote(id: String) {
+        viewModelScope.launch {
+            notesRepository.deleteNote(id)
         }
     }
 

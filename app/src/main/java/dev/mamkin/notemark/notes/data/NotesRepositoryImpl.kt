@@ -14,8 +14,8 @@ class NotesRepositoryImpl(
         return localNotesDataSource.getNotes()
     }
 
-    override suspend fun createNote(title: String, content: String) {
-        TODO("Not yet implemented")
+    override suspend fun createNote(title: String, content: String): Note {
+        return localNotesDataSource.insertNote(title, content)
     }
 
     override suspend fun updateNote(
@@ -24,5 +24,13 @@ class NotesRepositoryImpl(
         content: String
     ) {
         TODO("Not yet implemented")
+    }
+
+    override suspend fun deleteNote(id: String) {
+        localNotesDataSource.deleteNote(id)
+    }
+
+    override suspend fun getNote(id: String): Note? {
+        return localNotesDataSource.getNote(id)
     }
 }
