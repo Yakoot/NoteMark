@@ -1,6 +1,5 @@
 package dev.mamkin.notemark.notes.presentation.notes.components
 
-import android.R.attr.text
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size

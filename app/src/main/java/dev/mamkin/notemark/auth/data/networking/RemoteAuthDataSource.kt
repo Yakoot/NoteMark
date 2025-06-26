@@ -8,8 +8,8 @@ import dev.mamkin.notemark.core.data.datastore.TokenDataStore
 import dev.mamkin.notemark.core.data.datastore.UserProfileDataStore
 import dev.mamkin.notemark.core.data.networking.constructUrl
 import dev.mamkin.notemark.core.data.networking.safeCall
+import dev.mamkin.notemark.core.domain.util.DataError
 import dev.mamkin.notemark.core.domain.util.EmptyResult
-import dev.mamkin.notemark.core.domain.util.NetworkError
 import dev.mamkin.notemark.core.domain.util.asEmptyDataResult
 import dev.mamkin.notemark.core.domain.util.onSuccess
 import io.ktor.client.HttpClient
@@ -26,7 +26,7 @@ class RemoteAuthDataSource(
         username: String,
         password: String,
         email: String
-    ): EmptyResult<NetworkError> {
+    ): EmptyResult<DataError.Network> {
         return safeCall {
             httpClient.post(
                 urlString = constructUrl("/api/auth/register")
@@ -45,7 +45,7 @@ class RemoteAuthDataSource(
     override suspend fun login(
         email: String,
         password: String
-    ): EmptyResult<NetworkError> {
+    ): EmptyResult<DataError.Network> {
         val result = safeCall<LoginResponse> {
             httpClient.post(
                 urlString = constructUrl("/api/auth/login")

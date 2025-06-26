@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import dev.mamkin.notemark.core.data.datastore.UserProfileDataStore
 import dev.mamkin.notemark.core.domain.util.onSuccess
 import dev.mamkin.notemark.notes.domain.NotesRepository
+import dev.mamkin.notemark.notes.domain.models.Note
 import dev.mamkin.notemark.notes.presentation.notes.models.toUIModel
-import dev.mamkin.notemark.register.presentation.register.RegisterEvent
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,6 +15,11 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlin.uuid.Uuid
 
 class NotesViewModel(
     private val notesRepository: NotesRepository,
@@ -69,13 +74,22 @@ class NotesViewModel(
         }
     }
 
+    @OptIn(ExperimentalTime::class)
     private fun onCreateNote() {
         viewModelScope.launch {
-            val note = notesRepository.createNote(
+            val uuid = Uuid.random()
+            val time = ZonedDateTime.now()
+            val note = Note(
+                id = uuid.toString(),
                 title = "Note title",
-                content = ""
+                content = "",
+                createdAt = time,
+                lastEditedAt = time
             )
-            eventChannel.send(NotesEvent.NavigateToEdit(note.id))
+            val result = notesRepository.createNote(note)
+            result.onSuccess {
+                eventChannel.send(NotesEvent.NavigateToEdit(note.id))
+            }
         }
     }
 

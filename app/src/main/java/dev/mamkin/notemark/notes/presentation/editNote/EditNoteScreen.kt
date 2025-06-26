@@ -33,6 +33,7 @@ import dev.mamkin.notemark.core.presentation.designsystem.text_fields.Transparen
 import dev.mamkin.notemark.core.presentation.designsystem.theme.NoteMarkTheme
 import dev.mamkin.notemark.core.presentation.designsystem.theme.topBarAction
 import dev.mamkin.notemark.core.presentation.util.DeviceType
+import dev.mamkin.notemark.core.presentation.util.ObserveAsEvents
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -43,6 +44,12 @@ fun EditNoteRoot(
     navigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    ObserveAsEvents(viewModel.events) {
+        when (it) {
+            is EditNoteEvent.Close -> navigateBack()
+        }
+    }
 
     EditNoteScreen(
         state = state,

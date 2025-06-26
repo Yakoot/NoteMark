@@ -8,6 +8,7 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import kotlin.uuid.Uuid
 
 fun NoteDto.toNote(): Note  {
     val systemDefaultZone = ZoneId.systemDefault()
@@ -32,9 +33,21 @@ fun Note.toNoteDto(): NoteDto = NoteDto(
     lastEditedAt = this.lastEditedAt.toIso8601String()
 )
 
+fun Note.toNoteEntity(): NoteEntity = NoteEntity(
+    id = Uuid.parse(this.id),
+    title = this.title,
+    content = this.content,
+    createdAt = this.createdAt.toEpochMilli(),
+    lastEditedAt = this.lastEditedAt.toEpochMilli()
+)
+
 fun ZonedDateTime.toIso8601String(): String {
     val instant = this.toInstant()
     return instant.atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT)
+}
+
+fun ZonedDateTime.toEpochMilli(): Long {
+    return this.toInstant().toEpochMilli()
 }
 
 fun NoteEntity.toNote(): Note {

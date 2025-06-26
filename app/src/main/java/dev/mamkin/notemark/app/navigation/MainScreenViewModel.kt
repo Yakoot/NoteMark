@@ -2,7 +2,6 @@ package dev.mamkin.notemark.app.navigation
 
 import androidx.lifecycle.ViewModel
 import dev.mamkin.notemark.core.data.datastore.TokenDataStore
-import dev.mamkin.notemark.login.presentation.login.LoginEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.first

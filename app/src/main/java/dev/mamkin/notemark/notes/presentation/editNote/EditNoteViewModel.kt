@@ -2,15 +2,19 @@ package dev.mamkin.notemark.notes.presentation.editNote
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.mamkin.notemark.notes.domain.LocalNotesDataSource
+import dev.mamkin.notemark.core.domain.util.onSuccess
 import dev.mamkin.notemark.notes.domain.NotesRepository
-import dev.mamkin.notemark.notes.domain.RemoteNotesDataSource
+import dev.mamkin.notemark.notes.domain.models.Note
+import dev.mamkin.notemark.notes.presentation.notes.NotesEvent
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.ZonedDateTime
 
 class EditNoteViewModel(
     private val id: String,
@@ -18,6 +22,11 @@ class EditNoteViewModel(
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
+
+    private var currentNote: Note? = null
+
+    private val eventChannel = Channel<EditNoteEvent>()
+    val events = eventChannel.receiveAsFlow()
 
     private val _state = MutableStateFlow(EditNoteState())
     val state = _state
@@ -35,14 +44,12 @@ class EditNoteViewModel(
         )
 
     private suspend fun loadNote() {
-        val note = notesRepository.getNote(id)
-        note?.let {
-            _state.update {
-                it.copy(
-                    title = note.title,
-                    content = note.content
-                )
-            }
+        currentNote = notesRepository.getNote(id)
+        currentNote?.let {
+            _state.value = EditNoteState(
+                title = it.title,
+                content = it.content
+            )
         }
     }
 
@@ -67,7 +74,17 @@ class EditNoteViewModel(
 
     private fun saveNote() {
         viewModelScope.launch {
-//            localNotesDataSource.insertNote(title = state.value.title, content = state.value.content)
+            val note = currentNote?.copy(
+                title = state.value.title,
+                content = state.value.content,
+                lastEditedAt = ZonedDateTime.now()
+            )
+            note?.let {
+                notesRepository.updateNote(it)
+                    .onSuccess {
+                        eventChannel.send(EditNoteEvent.Close)
+                    }
+            }
         }
     }
 

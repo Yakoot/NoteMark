@@ -2,9 +2,10 @@ package dev.mamkin.notemark.notes.data
 
 import dev.mamkin.notemark.core.data.networking.constructUrl
 import dev.mamkin.notemark.core.data.networking.safeCall
+import dev.mamkin.notemark.core.domain.util.DataError
 import dev.mamkin.notemark.core.domain.util.EmptyResult
-import dev.mamkin.notemark.core.domain.util.NetworkError
 import dev.mamkin.notemark.core.domain.util.Result
+import dev.mamkin.notemark.core.domain.util.asEmptyDataResult
 import dev.mamkin.notemark.core.domain.util.map
 import dev.mamkin.notemark.notes.data.dto.NoteDto
 import dev.mamkin.notemark.notes.data.dto.NotesResponse
@@ -22,7 +23,7 @@ import io.ktor.client.request.setBody
 class KtorRemoteNotesDataSource(
     private val httpClient: HttpClient,
 ) : RemoteNotesDataSource {
-    override suspend fun createNote(note: Note): Result<Note, NetworkError> {
+    override suspend fun createNote(note: Note): EmptyResult<DataError.Network> {
         return safeCall<NoteDto> {
             httpClient.post(
                 urlString = constructUrl("/api/notes")
@@ -31,10 +32,10 @@ class KtorRemoteNotesDataSource(
                     note.toNoteDto()
                 )
             }
-        }.map { it.toNote() }
+        }.asEmptyDataResult()
     }
 
-    override suspend fun updateNote(note: Note): Result<Note, NetworkError> {
+    override suspend fun updateNote(note: Note): EmptyResult<DataError.Network> {
         return safeCall<NoteDto> {
             httpClient.put(
                 urlString = constructUrl("/api/notes")
@@ -43,10 +44,10 @@ class KtorRemoteNotesDataSource(
                     note.toNoteDto()
                 )
             }
-        }.map { it.toNote() }
+        }.asEmptyDataResult()
     }
 
-    override suspend fun deleteNote(noteId: String): EmptyResult<NetworkError> {
+    override suspend fun deleteNote(noteId: String): EmptyResult<DataError.Network> {
         return safeCall {
             httpClient.delete(
                 urlString = constructUrl("/api/notes/$noteId")
@@ -54,7 +55,7 @@ class KtorRemoteNotesDataSource(
         }
     }
 
-    override suspend fun getNotes(): Result<List<Note>, NetworkError> {
+    override suspend fun getNotes(): Result<List<Note>, DataError.Network> {
         return safeCall<NotesResponse> {
             httpClient.get(
                 urlString = constructUrl("/api/notes")

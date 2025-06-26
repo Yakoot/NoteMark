@@ -2,7 +2,6 @@ package dev.mamkin.notemark.core.database.notes
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverter
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -16,4 +15,3 @@ data class NoteEntity(
     val createdAt: Long,
     val lastEditedAt: Long,
 )
-

@@ -1,6 +1,5 @@
 package dev.mamkin.notemark.app.di
 
-import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.mamkin.notemark.app.NoteMarkApp
 import dev.mamkin.notemark.app.navigation.MainScreenViewModel
 import dev.mamkin.notemark.auth.data.networking.RemoteAuthDataSource
