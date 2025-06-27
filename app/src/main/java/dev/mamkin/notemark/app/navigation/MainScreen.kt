@@ -77,8 +77,8 @@ fun MainScreen(
 
                 is Notes -> NavEntry(key) {
                     NotesRoot(
-                        navigateToEditNote = {
-                            backStack.add(EditNote(id = it))
+                        navigateToEditNote = { id, isNew ->
+                            backStack.add(EditNote(id = id, isNew = isNew))
                         }
                     )
                 }
@@ -86,6 +86,7 @@ fun MainScreen(
                 is EditNote -> NavEntry(key) {
                     EditNoteRoot(
                         id = key.id,
+                        isNew = key.isNew,
                         navigateBack = {
                             backStack.removeLastOrNull()
                         }
@@ -108,4 +109,4 @@ data object Register: NavKey
 @Serializable
 data object Notes: NavKey
 @Serializable
-data class EditNote(val id: String): NavKey
+data class EditNote(val id: String, val isNew: Boolean = true): NavKey

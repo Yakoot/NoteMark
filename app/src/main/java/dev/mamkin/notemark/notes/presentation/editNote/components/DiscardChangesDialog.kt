@@ -1,4 +1,4 @@
-package dev.mamkin.notemark.notes.presentation.notes.components
+package dev.mamkin.notemark.notes.presentation.editNote.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,17 +25,16 @@ import dev.mamkin.notemark.core.presentation.designsystem.dialogs.AppConfirmDial
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeleteNoteConfirmationDialog(
+fun DiscardChangesDialog(
     onDismissRequest: () -> Unit,
     onConfirm: () -> Unit,
 ) {
     AppConfirmDialog(
         onDismiss = onDismissRequest,
         onConfirm = onConfirm,
-        title = "Delete Note?",
-        text = "Are you sure you want to delete this note?\n" +
-                "This action cannot be undone.",
-        confirmButtonText = "Delete",
-        dismissButtonText = "Cancel"
+        title = "Discard Changes?",
+        text = "You have unsaved changes. If you discard now, all changes will be lost.",
+        confirmButtonText = "Discard",
+        dismissButtonText = "Keep Editing"
     )
 }

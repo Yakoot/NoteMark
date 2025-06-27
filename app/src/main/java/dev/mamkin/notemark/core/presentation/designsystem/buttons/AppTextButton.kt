@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.mamkin.notemark.core.presentation.designsystem.theme.NoteMarkTheme
@@ -19,6 +20,7 @@ fun AppTextButton(
     text: String,
     onClick: () -> Unit,
     enabled: Boolean = true,
+    textStyle: TextStyle = MaterialTheme.typography.titleSmall
 ) {
     Button(
         modifier = modifier,
@@ -33,7 +35,7 @@ fun AppTextButton(
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.titleSmall,
+            style = textStyle,
         )
     }
 }

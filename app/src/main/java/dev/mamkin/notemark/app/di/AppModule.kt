@@ -43,8 +43,9 @@ val appModule = module {
     viewModelOf(::LoginViewModel)
     viewModelOf(::NotesViewModel)
     viewModelOf(::MainScreenViewModel)
-    viewModel { (id: String) -> EditNoteViewModel(
+    viewModel { (id: String, isNew: Boolean) -> EditNoteViewModel(
         id = id,
+        isNew = isNew,
         notesRepository = get(),
     ) }
 }

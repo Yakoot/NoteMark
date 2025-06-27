@@ -1,5 +1,6 @@
 package dev.mamkin.notemark.notes.presentation.editNote
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.mamkin.notemark.core.domain.util.onSuccess
@@ -19,6 +20,7 @@ import java.time.ZonedDateTime
 class EditNoteViewModel(
     private val id: String,
     private val notesRepository: NotesRepository,
+    private val isNew: Boolean = true,
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -31,6 +33,7 @@ class EditNoteViewModel(
     private val _state = MutableStateFlow(EditNoteState())
     val state = _state
         .onStart {
+            println("State started")
             if (!hasLoadedInitialData) {
                 loadNote()
                 /** Load initial data here **/
@@ -44,7 +47,6 @@ class EditNoteViewModel(
         )
 
     private suspend fun loadNote() {
-        println("Loading note with id: $id")
         currentNote = notesRepository.getNote(id)
         currentNote?.let {
             _state.value = EditNoteState(
@@ -61,7 +63,20 @@ class EditNoteViewModel(
             is EditNoteAction.SaveNote -> {
                 saveNote()
             }
-            else -> TODO("Handle actions")
+            EditNoteAction.Close -> onClose()
+        }
+    }
+
+    private fun onClose() {
+        viewModelScope.launch {
+            if (state.value.title != currentNote?.title || state.value.content != currentNote?.content) {
+                eventChannel.send(EditNoteEvent.ShowDiscardDialog)
+                return@launch
+            }
+            if (state.value.content.isEmpty() && isNew) {
+                notesRepository.deleteNote(id)
+            }
+            eventChannel.send(EditNoteEvent.Close)
         }
     }
 
@@ -87,6 +102,12 @@ class EditNoteViewModel(
                     }
             }
         }
+    }
+
+    fun clear() {
+        _state.value = EditNoteState()
+        currentNote = null
+        hasLoadedInitialData = false
     }
 
 }

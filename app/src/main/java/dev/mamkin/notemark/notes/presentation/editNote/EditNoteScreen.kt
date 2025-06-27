@@ -1,5 +1,6 @@
 package dev.mamkin.notemark.notes.presentation.editNote
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -24,48 +25,70 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.mamkin.notemark.core.presentation.designsystem.buttons.AppTextButton
 import dev.mamkin.notemark.core.presentation.designsystem.text_fields.TransparentHintTextField
 import dev.mamkin.notemark.core.presentation.designsystem.theme.NoteMarkTheme
 import dev.mamkin.notemark.core.presentation.designsystem.theme.topBarAction
 import dev.mamkin.notemark.core.presentation.util.DeviceType
 import dev.mamkin.notemark.core.presentation.util.ObserveAsEvents
+import dev.mamkin.notemark.notes.presentation.editNote.components.DiscardChangesDialog
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @Composable
 fun EditNoteRoot(
     id: String,
-    viewModel: EditNoteViewModel = koinViewModel(parameters = { parametersOf(id) }),
+    isNew: Boolean = true,
+    viewModel: EditNoteViewModel = koinViewModel(
+        parameters = { parametersOf(id, isNew) },
+        key = id
+    ),
     navigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    var openAlertDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(id) {
-        println("EditNoteRoot launched with id: $id")
+
+    BackHandler {
+        viewModel.onAction(EditNoteAction.Close)
     }
+
 
     ObserveAsEvents(viewModel.events) {
         when (it) {
             is EditNoteEvent.Close -> navigateBack()
+            is EditNoteEvent.ShowDiscardDialog -> {
+                openAlertDialog = true
+            }
         }
+    }
+
+    if (openAlertDialog) {
+        DiscardChangesDialog(
+            onDismissRequest = {
+                openAlertDialog = false
+            },
+            onConfirm = {
+                openAlertDialog = false
+                navigateBack()
+                viewModel.clear()
+            }
+        )
     }
 
     EditNoteScreen(
         state = state,
-        onAction = {
-            when (it) {
-                EditNoteAction.Close -> navigateBack()
-                else -> {
-                    viewModel.onAction(it)
-                }
-            }
-        }
+        onAction = viewModel::onAction
     )
 }
 
@@ -229,13 +252,10 @@ private fun TopBar(
             titleContentColor = MaterialTheme.colorScheme.onSurface
         ),
         actions = {
-            Text(
+            AppTextButton(
                 text = "SAVE NOTE",
-                style = MaterialTheme.typography.topBarAction,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .padding(end = saveButtonPadding)
-                    .clickable(onClick = onSaveClick)
+                textStyle = MaterialTheme.typography.topBarAction,
+                onClick = onSaveClick
             )
         }
     )

@@ -4,9 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -38,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.mamkin.notemark.core.presentation.designsystem.dialogs.AppConfirmDialog
 import dev.mamkin.notemark.core.presentation.designsystem.theme.FabGradientEnd
 import dev.mamkin.notemark.core.presentation.designsystem.theme.FabGradientStart
 import dev.mamkin.notemark.core.presentation.designsystem.theme.NoteMarkTheme
@@ -52,13 +55,14 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun NotesRoot(
     viewModel: NotesViewModel = koinViewModel(),
-    navigateToEditNote: (String) -> Unit,
+    navigateToEditNote: (String, Boolean) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     ObserveAsEvents(viewModel.events) {
         when(it) {
-            is NotesEvent.NavigateToEdit -> navigateToEditNote(it.id)
+            is NotesEvent.NavigateToEdit -> navigateToEditNote(it.id, false)
+            is NotesEvent.NavigateToEditAfterCreation -> navigateToEditNote(it.id, true)
         }
     }
 
@@ -144,7 +148,8 @@ fun NotesScreen(
                 containerColor = MaterialTheme.colorScheme.surface,
                 floatingActionButton = {
                     CreateNoteButton { onAction(NotesAction.CreateNote) }
-                }
+                },
+                contentWindowInsets = WindowInsets.safeDrawing
             ) {
                 if (state.notes.isEmpty()) {
                     EmptyNotesMessage(
@@ -154,6 +159,7 @@ fun NotesScreen(
                     NotesGrid(
                         contentPadding = it,
                         notes = state.notes,
+                        columnCount = 3,
                         onNoteClick = { onAction(NotesAction.OpenNote(it.id)) },
                         onNoteLongClick = { onNoteLongClick(it) }
                     )
@@ -290,7 +296,7 @@ private fun NotesGrid(
     LazyVerticalStaggeredGrid(
         contentPadding = contentPadding,
         columns = StaggeredGridCells.Fixed(columnCount),
-        modifier = Modifier
+        modifier = modifier
             .padding(16.dp)
             .fillMaxSize(),
         horizontalArrangement = Arrangement.spacedBy(16.dp),

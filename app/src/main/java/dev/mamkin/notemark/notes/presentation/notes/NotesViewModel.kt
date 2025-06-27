@@ -69,8 +69,15 @@ class NotesViewModel(
     fun onAction(action: NotesAction) {
         when (action) {
             is NotesAction.DeleteNote -> onDeleteNote(action.id)
+            is NotesAction.OpenNote -> onOpenNote(action.id)
             NotesAction.CreateNote -> onCreateNote()
             else -> TODO("Handle actions")
+        }
+    }
+
+    private fun onOpenNote(id: String) {
+        viewModelScope.launch {
+            eventChannel.send(NotesEvent.NavigateToEdit(id))
         }
     }
 
@@ -81,7 +88,7 @@ class NotesViewModel(
             val time = ZonedDateTime.now()
             val note = Note(
                 id = uuid.toString(),
-                title = "Note title",
+                title = "New Note",
                 content = "",
                 createdAt = time,
                 lastEditedAt = time
