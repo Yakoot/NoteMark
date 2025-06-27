@@ -56,6 +56,9 @@ class NotesRepositoryImpl(
 
     override suspend fun deleteNote(id: String) {
         localNotesDataSource.deleteNote(id)
+        applicationScope.async {
+            remoteNotesDataSource.deleteNote(id)
+        }.await()
     }
 
     override suspend fun getNote(id: String): Note? {

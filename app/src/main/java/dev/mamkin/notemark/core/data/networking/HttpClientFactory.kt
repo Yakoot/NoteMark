@@ -65,6 +65,7 @@ object HttpClientFactory {
                                 refreshToken = response.data.refreshToken
                             )
                         } else {
+                            tokenStorage.saveTokens("", "")
                             BearerTokens(
                                 refreshToken = "",
                                 accessToken = ""

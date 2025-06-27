@@ -44,6 +44,7 @@ class EditNoteViewModel(
         )
 
     private suspend fun loadNote() {
+        println("Loading note with id: $id")
         currentNote = notesRepository.getNote(id)
         currentNote?.let {
             _state.value = EditNoteState(

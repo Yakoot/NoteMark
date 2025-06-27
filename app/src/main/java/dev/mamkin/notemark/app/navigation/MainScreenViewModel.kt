@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import dev.mamkin.notemark.core.data.datastore.TokenDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -17,9 +18,10 @@ class MainScreenViewModel(
 
     init {
         coroutineScope.launch {
-            val refreshToken = tokenDataStore.refreshTokenFlow.first()
-            if (refreshToken.isNullOrBlank()) {
-                eventChannel.send(MainScreenEvent.NavigateToLandingPage)
+            tokenDataStore.refreshTokenFlow.collectLatest {
+                if (it.isNullOrBlank()) {
+                    eventChannel.send(MainScreenEvent.NavigateToLandingPage)
+                }
             }
         }
     }
