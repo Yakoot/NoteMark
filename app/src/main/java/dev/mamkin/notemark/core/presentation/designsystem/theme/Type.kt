@@ -63,3 +63,12 @@ val Typography.titleXLarge: TextStyle
         lineHeight = 40.sp,
         letterSpacing = 0.01.em
     )
+
+val Typography.topBarAction: TextStyle
+    get() = TextStyle(
+        fontFamily = SpaceGroteskFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.01.em
+    )
